@@ -2,15 +2,15 @@
 
 void Graph::addConnection(const std::string& from, const std::string& to, const std::string& line, int time)
 {
-	// if the from-station doesnt exist yet add it to map
+	// Add the 'from' station if it doesn't exist
 	if (stations.find(from) == stations.end()) {
 		stations[from] = { from, {} };
 	}
-	// if the to-station doesnt exist add it to map
+	// Add the 'to' station if it doesn't exist
 	if (stations.find(to) == stations.end()) {
 		stations[to] = { to, {} };
 	}
-	// add connection from x to y with destination, line and time ("cost")
+	// Add the connection from 'from' to 'to'
 	std::cout << "+ connection: " << from << "->" << to << std::endl;
 	stations[from].connections.push_back({ to, line, time });
 }
@@ -23,7 +23,7 @@ std::vector<std::string> Graph::findPath(const std::string& start, const std::st
 	// priority queue sorting after smallest timeDistance 
 	std::priority_queue <std::pair<int, std::string>,
 		std::vector<std::pair<int, std::string>>,
-		std::greater < std::pair<int, std::string>>> pq;
+			std::greater<std::pair<int, std::string>>> pq;
 
 	// check if stations is uninitialized?
 	if (stations.empty()) return {};
@@ -38,19 +38,28 @@ std::vector<std::string> Graph::findPath(const std::string& start, const std::st
 	timeDistances[start] = 0;
 	pq.push({ 0, start });
 
+	// set of visited stations
+	std::set<std::string> visited;
+	
 	while (!pq.empty())
 	{
 		//destructure currCost and currName from top element
 		auto [currCost, currName] = pq.top();
 		pq.pop();
 
-		// if target has been reached break
+		//if current station is the end station break
 		if (currName == end) break;
+		// if currName in visited skip
+		else if (visited.contains(currName)) continue;
+
+		// station hasn't been visited yet -> add it to visited set
+		visited.insert(currName);
 
 		// for every connection of the current station -> update distances
 		for (const auto& conn : stations.at(currName).connections)
 		{
 			int newDist = timeDistances[currName] + conn.time;
+
 			if (newDist < timeDistances[conn.destination])
 			{
 				timeDistances[conn.destination] = newDist; // update dist of neighbour station
@@ -82,20 +91,27 @@ void Graph::readGraph(const std::string& filename)
 	}
 	// read file line by line
 	while (getline(file, line)) {
-		std::stringstream ss(line);
-		std::string lineName, stationName;
+		std::istringstream ss(line);
+
+		std::string line, stationTo;
 		int time;
 
-		getline(ss, lineName, ':'); //extract linename (before ':')
+		getline(ss, line, ':'); //extract linename (before ':')
 
-		std::string previousStation;
-		// extract quoted stationName and time
-		while (ss >> std::quoted(stationName) >> time) {
-			// if there is a previous station add a connection to it
-			if (!previousStation.empty()) {
-				addConnection(previousStation, stationName, lineName, time);
-			}
-			previousStation = stationName;
+		std::string stationFrom;
+
+		ss >> std::ws; // for skipping whitespaces
+
+		if (!(ss >> std::quoted(stationFrom)))
+		{
+			std::cout << "Found no starting station";
+			return;
+		}
+		
+		while (ss >> time >> std::quoted(stationTo))
+		{
+			addConnection(stationFrom, stationTo, line, time);
+			stationFrom = stationTo;
 		}
 	}
 }

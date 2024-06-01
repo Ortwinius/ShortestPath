@@ -11,13 +11,16 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	//std::cout << "filename: " << argv[1] << std::endl;
+	std::cout << "filename: " << argv[1] << std::endl;
 	std::cout << "start: " << argv[2] << std::endl;
 	std::cout << "end: " << argv[3] << std::endl;
 
 	std::string filename = argv[1]; 
-	std::string start = "Altes Landgut";
-	std::string end = "Gersthof";
+	//std::string start = argv[2];
+	//std::string end = argv[3];
+	
+	std::string start = "Canisiusgasse";
+	std::string end = "Vinzenzgasse";	
 
 	Graph graph;
 	graph.readGraph(filename);
@@ -26,7 +29,7 @@ int main(int argc, char* argv[])
 	std::vector<std::string> path = graph.findPath(start, end, totalCost);
 
 	// print path if it has been found
-	if (path.size() == 1 && start != end && path[0] == end)
+	if (path.size() == 1 && start != end)
 	{
 		std::cout << "Couldn't find a path from " << start << " to " << end << "." << std::endl;
 	}

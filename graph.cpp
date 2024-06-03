@@ -11,7 +11,7 @@ void Graph::addConnection(const std::string& from, const std::string& to, const 
 		stations[to] = { to, {} };
 	}
 	// Add the connection from 'from' to 'to'
-	std::cout << "+ connection: " << from << "->" << to << std::endl;
+	// std::cout << "+ connection: " << from << "->" << to << std::endl;
 	stations[from].connections.push_back({ to, line, time });
 }
 

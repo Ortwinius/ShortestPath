@@ -11,16 +11,16 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	std::cout << "filename: " << argv[1] << std::endl;
-	std::cout << "start: " << argv[2] << std::endl;
-	std::cout << "end: " << argv[3] << std::endl;
+	//std::cout << "filename: " << argv[1] << std::endl;
+	std::cout << "From: " << argv[2] << std::endl;
+	std::cout << "To: " << argv[3] << std::endl;
 
 	std::string filename = argv[1]; 
 	//std::string start = argv[2];
 	//std::string end = argv[3];
 	
 	std::string start = "Canisiusgasse";
-	std::string end = "Vinzenzgasse";	
+	std::string end = "Siebenhirten";	
 
 	Graph graph;
 	graph.readGraph(filename);

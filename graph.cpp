@@ -10,9 +10,10 @@ void Graph::addConnection(const std::string& from, const std::string& to, const 
 	if (stations.find(to) == stations.end()) {
 		stations[to] = { to, {} };
 	}
-	// Add the connection from 'from' to 'to'
+	// Add the connections undirected (from->to and to->from)
 	// std::cout << "+ connection: " << from << "->" << to << std::endl;
 	stations[from].connections.push_back({ to, line, time });
+	stations[to].connections.push_back({ from, line, time });
 }
 
 // dijkstras algorithm O(n^2)

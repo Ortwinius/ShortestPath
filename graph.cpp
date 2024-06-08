@@ -4,16 +4,15 @@ void Graph::addConnection(const std::string& from, const std::string& to, const 
 {
 	// Add the 'from' station if it doesn't exist
 	if (stations.find(from) == stations.end()) {
-		stations[from] = { from, {} };
+		stations.try_emplace(from, Station{});
 	}
 	// Add the 'to' station if it doesn't exist
 	if (stations.find(to) == stations.end()) {
-		stations[to] = { to, {} };
+		stations.try_emplace(to, Station{});
 	}
 	// Add the connections undirected (from->to and to->from)
-	// std::cout << "+ connection: " << from << "->" << to << std::endl;
-	stations[from].connections.push_back({ to, line, time });
-	stations[to].connections.push_back({ from, line, time });
+	stations[from].connections.emplace_back(to, line, time);
+	stations[to].connections.emplace_back(from, line, time);
 }
 
 // dijkstras algorithm O(n^2)
@@ -83,7 +82,12 @@ std::vector<std::string> Graph::findPath(const std::string& start, const std::st
 void Graph::readGraph(const std::string& filename)
 {
 	std::ifstream file(filename);
-	std::string line;
+	std::string inputLine; // instead of "line" to prevent shadow variable naming
+
+	if (filename.empty()) {
+		std::cerr << "Error: Filename is empty." << std::endl;
+		return;
+	}
 
 	if (!file.is_open())
 	{
@@ -91,10 +95,10 @@ void Graph::readGraph(const std::string& filename)
 		return;
 	}
 	// read file line by line
-	while (getline(file, line)) {
-		std::istringstream ss(line);
+	while (getline(file, inputLine)) {
+		std::istringstream ss(inputLine);
 
-		std::string line, stationTo;
+		std::string line, stationTo; // line represents station line
 		int time;
 
 		getline(ss, line, ':'); //extract linename (before ':')
@@ -117,7 +121,7 @@ void Graph::readGraph(const std::string& filename)
 	}
 }
 
-void Graph::printPath(const std::vector<std::string>& path, int totalCost) const
+void Graph::printPath(const std::vector<std::string>& path, const int& totalCost) const
 {
 	std::cout << "Path: ";
 	std::string prevStation = "";
@@ -126,15 +130,17 @@ void Graph::printPath(const std::vector<std::string>& path, int totalCost) const
 	// check if another line has to be switched to
 	for (const std::string& station : path) {
 		if (!prevStation.empty()) {
-			for (const Connection& conn : stations.at(prevStation).connections) {
-				if (conn.destination == station) {
-					if (conn.line != prevLine) {
-						std::cout << " (Change to " << conn.line << ") ";
-					}
-					std::cout << " -> ";
-					prevLine = conn.line;
-					break;
+			// using find_if instead of raw for loop for better readability and less nesting
+			auto it = std::find_if(stations.at(prevStation).connections.begin(),
+				stations.at(prevStation).connections.end(),
+				[&](const Connection& conn) { return conn.destination == station; });
+
+			if (it != stations.at(prevStation).connections.end()) {
+				if (it->line != prevLine) {
+					std::cout << " (Change to " << it->line << ") ";
 				}
+				std::cout << " -> ";
+				prevLine = it->line;
 			}
 		}
 		std::cout << station;

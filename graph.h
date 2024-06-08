@@ -10,6 +10,7 @@
 #include <limits>
 #include <algorithm>
 #include <set>
+#include <utility>
 #include "structs.h"
 
 // data structure
@@ -20,7 +21,7 @@ public:
 	~Graph() = default;
 
 	void readGraph(const std::string& filename);
-	void printPath(const std::vector<std::string>& path, int totalCost) const;
+	void printPath(const std::vector<std::string>& path, const int& totalCost) const;
 
 	void addConnection(const std::string& from, const std::string& to, const std::string& line, int time);
 	std::vector<std::string> findPath(const std::string& start, const std::string& end, int& totalCost);
